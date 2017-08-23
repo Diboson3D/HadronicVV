@@ -14,35 +14,50 @@ LumiWeight::~LumiWeight( void ){
 
 //==============================================================================================
 double LumiWeight::getLumiWeight( TString sample ){
-  
-  xSec_ = 1.;
-  if( sample.Contains( "WJetsToQQ_HT"          ) ) xSec_ = 95.14;
-  else if( sample.Contains( "ZJetsToQQ_HT600toInf"  ) ) xSec_ = 41.34;
-  else if( sample.Contains( "QCD_Pt_170to300_"      ) ) xSec_ = 117276.;
-  else if( sample.Contains( "QCD_Pt_300to470_"      ) ) xSec_ = 7823.;                   
-  else if( sample.Contains( "QCD_Pt_470to600_"      ) ) xSec_ = 648.2;                  
-  else if( sample.Contains( "QCD_Pt_600to800_"      ) ) xSec_ = 186.9;                 
-  else if( sample.Contains( "QCD_Pt_800to1000_"     ) ) xSec_ = 32.293;               
-  else if( sample.Contains( "QCD_Pt_1000to1400_"    ) ) xSec_ = 9.4183; 
-  else if( sample.Contains( "QCD_Pt_1400to1800_"    ) ) xSec_ = 0.84265; 
-  else if( sample.Contains( "QCD_Pt_1800to2400_"    ) ) xSec_ = 0.114943; 
-  else if( sample.Contains( "QCD_Pt_2400to3200_"    ) ) xSec_ = 0.006830; 
-  else if( sample.Contains( "QCD_Pt_3200toInf_"     ) ) xSec_ = 0.000165445; 
-  else if( sample.Contains( "QCD_HT100to200"        ) ) xSec_ = 2.785e07;
-  else if( sample.Contains( "QCD_HT200to300"        ) ) xSec_ = 1717000.;
-  else if( sample.Contains( "QCD_HT300to500"        ) ) xSec_ = 351300.0;
-  else if( sample.Contains( "QCD_HT500to700"        ) ) xSec_ = 31630.;
-  else if( sample.Contains( "QCD_HT700to1000"       ) ) xSec_ = 6802.;
-  else if( sample.Contains( "QCD_HT1000to1500"      ) ) xSec_ = 1206.0;
-  else if( sample.Contains( "QCD_HT1500to2000"      ) ) xSec_ = 120.4;
-  else if( sample.Contains( "QCD_HT2000toInf"       ) ) xSec_ = 25.25;
-  else if( sample.Contains( "QCD_Pt-15to7000" ) or sample.Contains( "QCD_Pt_15to7000" ))xSec_ =  2.022100000e+09;
-  else if( sample.Contains("BulkGrav") or sample.Contains("Qstar") or sample.Contains("Wprime") or sample.Contains("Zprime")) xSec_ = 1.0;
-  else{
-    std::cout << "Cross section not defined for this sample!!" << std::endl;
-      return -999.;
-  }
-  return xSec_;
 
-      
+
+  if( sample.Contains( "WJetsToQQ_HT"          ) ) return 95.14;
+  if( sample.Contains( "ZJetsToQQ_HT600toInf"  ) ) return 41.34;
+  if( sample.Contains( "QCD_Pt_170to300_"      ) ) return 117276.;
+  if( sample.Contains( "QCD_Pt_300to470_"      ) ) return 7823.;                   
+  if( sample.Contains( "QCD_Pt_470to600_"      ) ) return 648.2;                  
+  if( sample.Contains( "QCD_Pt_600to800_"      ) ) return 186.9;                 
+  if( sample.Contains( "QCD_Pt_800to1000_"     ) ) return 32.293;               
+  if( sample.Contains( "QCD_Pt_1000to1400_"    ) ) return 9.4183; 
+  if( sample.Contains( "QCD_Pt_1400to1800_"    ) ) return 0.84265; 
+  if( sample.Contains( "QCD_Pt_1800to2400_"    ) ) return 0.114943; 
+  if( sample.Contains( "QCD_Pt_2400to3200_"    ) ) return 0.006830; 
+  if( sample.Contains( "QCD_Pt_3200toInf_"     ) ) return 0.000165445; 
+  if( sample.Contains( "QCD_HT100to200"        ) ) return 2.785e07;
+  if( sample.Contains( "QCD_HT200to300"        ) ) return 1717000.;
+  if( sample.Contains( "QCD_HT300to500"        ) ) return 351300.0;
+  if( sample.Contains( "QCD_HT500to700"        ) ) return 31630.;
+  if( sample.Contains( "QCD_HT700to1000"       ) ) return 6802.;
+  if( sample.Contains( "QCD_HT1000to1500"      ) ) return 1206.0;
+  if( sample.Contains( "QCD_HT1500to2000"      ) ) return 120.4;
+  if( sample.Contains( "QCD_HT2000toInf"       ) ) return 25.25;
+  if( sample.Contains( "QCD_Pt-15to7000" ) or sample.Contains( "QCD_Pt_15to7000" )) return  2.022100000e+09;
+  if( sample.Contains("BulkGrav") or sample.Contains("Qstar") or sample.Contains("Wprime") or sample.Contains("Zprime")) return 1.0;
+  
+  
+  std::cout << "Cross section not defined for this sample!!" << std::endl;
+  return 0;
+  
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

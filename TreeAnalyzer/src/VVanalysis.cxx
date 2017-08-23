@@ -252,7 +252,9 @@ void VVanalysis::ExecuteEvent( const SInputData&, Double_t weight) throw( SError
     b_weight= getEventWeight();
   }
   // for inclusive signal samples only take generated hadronic events
+
   // if( m_isSignal && !SignalIsHad( m_genParticle, m_Channel)) throw SError( SError::SkipEvent);
+
   ++m_allEvents;
   ( *m_test )[ 0 ]++;
       
@@ -293,7 +295,6 @@ void VVanalysis::ExecuteEvent( const SInputData&, Double_t weight) throw( SError
       myjet.puppi_tau1        = mypuppijet.tau1();
       myjet.puppi_tau2        = mypuppijet.tau2();
        
-           
     }
     
     //Match to gen jet
@@ -321,7 +322,6 @@ void VVanalysis::ExecuteEvent( const SInputData&, Double_t weight) throw( SError
 
 
 
-
   //-------------Select two fat jets-------------//
   if( goodFatJets.size() < 2 ) throw SError( SError::SkipEvent );
   ++m_passedLoose;
@@ -334,7 +334,7 @@ void VVanalysis::ExecuteEvent( const SInputData&, Double_t weight) throw( SError
      ) throw SError( SError::SkipEvent );
   ++m_passedPuppi;
   ( *m_test )[ 2 ]++;
-  
+
 
      
   std::vector<UZH::Jet> goodFatJets_sorted = SortAfterPuppiSDMass(goodFatJets);
