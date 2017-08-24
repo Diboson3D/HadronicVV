@@ -19,6 +19,6 @@ bool SignalIsHad( Ntuple::GenParticleNtupleObject data_ , std::string m_Channel)
 
 std::vector<UZH::Jet> SortAfterPuppiSDMass(std::vector <UZH::Jet> jets);
 
-void PrintEvent(std::vector<UZH::Jet> );
+void PrintEvent(std::vector<UZH::Jet> jets, std::vector<UZH::Electron> ele, std::vector<UZH::Muon> mu );
 
 #endif

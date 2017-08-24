@@ -314,13 +314,13 @@ void VVanalysis::ExecuteEvent( const SInputData&, Double_t weight) throw( SError
     }
     
     
-    if(! FoundNoLeptonOverlap(goodElectrons,goodMuons,myjet.tlv()) ) continue;
+    //if(! FoundNoLeptonOverlap(goodElectrons,goodMuons,myjet.tlv()) ) continue;
     goodFatJets.push_back(myjet);
   }
   
-
-
-
+  if(m_eventInfo.runNumber == 1 and m_eventInfo.eventNumber==15927 ){
+  PrintEvent(goodFatJets, goodElectrons, goodMuons );
+  }
 
   //-------------Select two fat jets-------------//
   if( goodFatJets.size() < 2 ) throw SError( SError::SkipEvent );
