@@ -133,6 +133,8 @@ private:
   float     m_o_genpt_jet2                ;
   float     m_o_pt_jet1                   ;
   float     m_o_pt_jet2                   ;
+  float     m_o_eta_jet1                   ;
+  float     m_o_eta_jet2                   ;
   int       m_o_njj                       ;
   int       m_o_jj_nOtherLeptons          ;
   
