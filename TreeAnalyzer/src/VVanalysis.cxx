@@ -265,6 +265,8 @@ void VVanalysis::ExecuteEvent( const SInputData&, Double_t weight) throw( SError
   std::vector<UZH::GenParticle> GenQuarks  = FindGeneratedQuarks(m_genParticle, m_isData);
   std::vector<UZH::Electron> goodElectrons = FindGoodLeptons(m_electron);
   std::vector<UZH::Muon>     goodMuons     = FindGoodLeptons(m_muon);
+  
+  std::vector<UZH::Jet> puppiJets;
 
   std::vector<int> puppiMatch;
   for ( int i = 0; i < (m_jetAK8.N); ++i ) {
@@ -290,6 +292,7 @@ void VVanalysis::ExecuteEvent( const SInputData&, Double_t weight) throw( SError
       }
       if (samePuppiJet) continue;
       puppiMatch.push_back(ii);
+      puppiJets.push_back(mypuppijet);
       dRmin = dR;
       myjet.puppi_softdropmass= ApplyPuppiSoftdropMassCorrections(mypuppijet,m_puppisd_corr,m_isData);//mypuppijet.softdrop_mass();
       myjet.puppi_tau1        = mypuppijet.tau1();
@@ -318,8 +321,10 @@ void VVanalysis::ExecuteEvent( const SInputData&, Double_t weight) throw( SError
     goodFatJets.push_back(myjet);
   }
   
-  if(m_eventInfo.runNumber == 1 and m_eventInfo.eventNumber==15927 ){
+  if(m_eventInfo.runNumber == 1 and m_eventInfo.eventNumber==15898){
+      std::cout << abs((m_jetAK8Puppi.pt->size())) << std::endl;
   PrintEvent(goodFatJets, goodElectrons, goodMuons );
+  PrintEvent(puppiJets, goodElectrons, goodMuons );
   }
 
   //-------------Select two fat jets-------------//

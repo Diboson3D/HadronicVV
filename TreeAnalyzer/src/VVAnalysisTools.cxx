@@ -141,6 +141,7 @@ void PrintEvent(std::vector<UZH::Jet> jets, std::vector<UZH::Electron> ele, std:
     for(unsigned int i=0;i<jets.size(); i++)
     {
         std::cout << "jet pt " << jets.at(i).tlv().Pt() << " eta " << jets.at(i).tlv().Eta() << " phi " << jets.at(i).tlv().Phi() << " e " << jets.at(i).tlv().E() << " puppi sd mass "<< jets.at(i).puppi_softdropmass << std::endl;
+        std::cout << "lepton overlap " << FoundNoLeptonOverlap(ele,mu,jets.at(i).tlv()) <<std::endl; 
     
     }
     
