@@ -18,6 +18,7 @@ std::vector<UZH::Muon> FindGoodLeptons(Ntuple::MuonNtupleObject m_muons);
 bool SignalIsHad( Ntuple::GenParticleNtupleObject data_ , std::string m_Channel);
 
 std::vector<UZH::Jet> SortAfterPuppiSDMass(std::vector <UZH::Jet> jets);
+std::vector<UZH::Jet> SortAfterTau21(std::vector <UZH::Jet> jets);
 
 void PrintEvent(std::vector<UZH::Jet> );
 
