@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE JobConfiguration PUBLIC "" "JobConfig.dtd">
+<JobConfiguration JobName="VVanalysisJob" OutputLevel="DEBUG">
+
+	<Library Name="libSFramePlugIns" />
+	<Library Name="libNtupleVariables"/>
+	<!-- <Library Name="libGoodRunsLists" /> -->
+	<Library Name="libPileupReweightingTool" />
+	<Library Name="libBTaggingTools" />
+	<Library Name="libTreeAnalyzer"/>
+	OUTPUT
+	INPUTHEADER
+	INFILE
+	<InputTree Name="ntuplizer/tree" />
+	<OutputTree Name="tree" />
+</InputData>
+<UserConfig>
+	ISSIGNAL
+	ISDATA
+	<Item Name="Channel" Value="qV" />
+	<Item Name="RecoTreeName" Value="tree"/>
+</UserConfig>
+</Cycle>
+</JobConfiguration>

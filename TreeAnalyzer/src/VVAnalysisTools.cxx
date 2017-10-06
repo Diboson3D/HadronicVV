@@ -67,9 +67,7 @@ std::vector<UZH::Electron> FindGoodLeptons(Ntuple::ElectronNtupleObject m_electr
     for(int i=0;i< m_electrons.N;i++)
     {
         UZH::Electron ele(&m_electrons,i);
-        if( ele.pt() <= 35.) continue;
-        if( fabs( ele.superCluster_eta() ) >= 1.4442 && fabs( ele.superCluster_eta() ) <= 1.566 ) continue;
-        if( fabs( ele.superCluster_eta() ) >= 2.5 ) continue;
+	//        if( fabs( ele.superCluster_eta() ) >= 2.5 ) continue;
         if( ! ele.isHeepElectron()  ) continue;
         goodEle.push_back(ele);
     }
@@ -83,7 +81,7 @@ std::vector<UZH::Muon> FindGoodLeptons(Ntuple::MuonNtupleObject m_muons){
         UZH::Muon mu(&m_muons,i);
         if( mu.pt() <= 30.) continue;
         if( fabs( mu.eta() ) >= 2.4 ) continue;
-        if( ! mu.isTightMuon()  ) continue;
+        if( ! mu.isTightMuon()  ) continue; // //isHighPtMuon
         if( mu.trackIso()/mu.pt() >= 0.1 ) continue;
         goodMu.push_back(mu);
     }
@@ -132,6 +130,24 @@ std::vector<UZH::Jet> SortAfterPuppiSDMass(std::vector <UZH::Jet> jets){
     }
     return sorted;
 }
+
+std::vector<UZH::Jet> SortAfterTau21(std::vector <UZH::Jet> jets){
+    std::vector<float> tau21;
+    std::map<float,int> map;
+    for(unsigned int i=0;i< jets.size(); i++)
+    {
+      tau21.push_back(jets[i].puppi_tau2/jets[i].puppi_tau1);
+      map[jets[i].puppi_tau2/jets[i].puppi_tau1] = i;
+    }
+    std::sort(tau21.begin(),tau21.end(),std::greater<float>() );
+    std::vector<UZH::Jet> sorted;
+    for(unsigned int i=0;i<tau21.size();i++)
+    {
+      sorted.push_back(jets.at(map[tau21.at(tau21.size()-i-1)]));
+    }
+    return sorted;
+}
+
 
 
 void PrintEvent(std::vector<UZH::Jet> jets, std::vector<UZH::Electron> ele, std::vector<UZH::Muon> mu )

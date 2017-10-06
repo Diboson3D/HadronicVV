@@ -36,7 +36,7 @@ double LumiWeight::getLumiWeight( TString sample ){
   if( sample.Contains( "QCD_HT1000to1500"      ) ) return 1206.0;
   if( sample.Contains( "QCD_HT1500to2000"      ) ) return 120.4;
   if( sample.Contains( "QCD_HT2000toInf"       ) ) return 25.25;
-  if( sample.Contains( "QCD_Pt-15to7000" ) or sample.Contains( "QCD_Pt_15to7000" )) return  2.022100000e+09;
+  if( sample.Contains( "QCD_Pt-15to7000" ) or sample.Contains( "QCD_Pt_15to7000" )) return  2.022100000e+09*60.5387252324;
   if( sample.Contains("BulkGrav") or sample.Contains("Qstar") or sample.Contains("Wprime") or sample.Contains("Zprime")) return 1.0;
   
   

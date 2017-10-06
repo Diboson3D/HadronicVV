@@ -128,7 +128,7 @@ void VVanalysis::BeginInputFile( const SInputData& ) throw( SError ) { //For eac
   // Get cross section
   b_xSec                        = 1.;
   TString infile = TString(this->GetHistInputFile()->GetName());
-  b_xSec  = m_xSec.getLumiWeight( infile ); 
+  if (!m_isData) b_xSec  = m_xSec.getLumiWeight( infile ); 
   m_logger << INFO << "Cross section set to " << b_xSec << " for file " << infile <<  SLogger::endmsg;
   if( b_xSec < 0.) throw SError( SError::SkipFile );
 
@@ -144,7 +144,7 @@ void VVanalysis::BeginInputData( const SInputData& id ) throw( SError ) { //call
   
   // Declare output variables:
   DeclareVariable( b_lumi                         , "lumi"  );
-  DeclareVariable( b_event                        , "event"  );
+  DeclareVariable( b_event                        , "evt"  );
   DeclareVariable( b_run                          , "run"  );
   DeclareVariable( b_weight                       , "weight"  );
   DeclareVariable( b_weightGen                    , "genWeight");
@@ -245,7 +245,8 @@ void VVanalysis::EndMasterInputData( const SInputData& ) throw( SError ){ //this
 
 void VVanalysis::ExecuteEvent( const SInputData&, Double_t weight) throw( SError ) { //This is the main analysis function that is called for each event. It receives the weight of the event, as it is calculated by the framework from the luminosities and generator cuts defined in the XML configuration.
   
-  float gW = (m_eventInfo.genEventWeight < 0) ? -1 : 1; 
+  // float gW = (m_eventInfo.genEventWeight < 0) ? -1 : 1;
+  float gW = m_eventInfo.genEventWeight;  //needed for Herwig
   nSumGenWeights += gW;
   Hist( "genEvents" )->Fill(gW);
   
@@ -254,6 +255,51 @@ void VVanalysis::ExecuteEvent( const SInputData&, Double_t weight) throw( SError
   if (!m_isData) {
     b_weight= getEventWeight();
   }
+  
+  int HLTJet360_TrimMass30_     = 0;     
+  int HLTHT700_TrimMass50_      = 0;     
+  int HLTHT650_MJJ950DEtaJJ1p5_ = 0;
+  int HLTHT650_MJJ900DEtaJJ1p5_ = 0;
+  int HLTHT800_                 = 0; 
+    
+  bool isfired = false;
+  for( std::map<std::string,bool>::iterator it = (m_eventInfo.trigDecision)->begin(); it != (m_eventInfo.trigDecision)->end(); ++it){
+    if( (it->first).find("AK8PFJet360_TrimMass30")          != std::string::npos) HLTJet360_TrimMass30_      = it->second;
+    if( (it->first).find("AK8PFHT700_TrimR0p1PT0p03Mass50") != std::string::npos) HLTHT700_TrimMass50_       = it->second;
+    if( (it->first).find("PFHT650_WideJetMJJ950DEtaJJ1p5")  != std::string::npos) HLTHT650_MJJ950DEtaJJ1p5_  = it->second;
+    if( (it->first).find("PFHT650_WideJetMJJ900DEtaJJ1p5")  != std::string::npos) HLTHT650_MJJ900DEtaJJ1p5_  = it->second;
+    if( (it->first).find("PFHT800_v")                       != std::string::npos) HLTHT800_                  = it->second;
+    if (HLTJet360_TrimMass30 or HLTHT700_TrimMass50 or HLTHT650_MJJ950DEtaJJ1p5 or HLTHT650_MJJ900DEtaJJ1p5 or HLTHT800) isfired = true;
+  }
+   if (m_isData && !isfired)  throw SError( SError::SkipEvent );
+   
+   HLTJet360_TrimMass30      = HLTJet360_TrimMass30_      ;
+   HLTHT700_TrimMass50       = HLTHT700_TrimMass50_       ;
+   HLTHT650_MJJ950DEtaJJ1p5  = HLTHT650_MJJ950DEtaJJ1p5_  ;
+   HLTHT650_MJJ900DEtaJJ1p5  = HLTHT650_MJJ900DEtaJJ1p5_  ;
+   HLTHT800                  = HLTHT800_                  ;
+   
+   
+   bool isgood = false;
+   if(m_eventInfo.PV_filter && m_eventInfo.passFilter_CSCHalo && m_eventInfo.passFilter_HBHELoose && m_eventInfo.passFilter_HBHEIso && m_eventInfo.passFilter_chargedHadronTrackResolution && m_eventInfo.passFilter_muonBadTrack && m_eventInfo.passFilter_ECALDeadCell) isgood=true;
+   if (m_isData && !isgood)  throw SError( SError::SkipEvent );
+   
+  b_lumi                          = m_eventInfo.lumiBlock;
+  b_event                         = m_eventInfo.eventNumber;
+  b_run                           = m_eventInfo.runNumber;
+  Flag_goodVertices               = m_eventInfo.PV_filter;
+  Flag_globalTightHalo2016Filter  = m_eventInfo.passFilter_CSCHalo;
+  Flag_HBHENoiseFilter            = m_eventInfo.passFilter_HBHELoose;
+  Flag_HBHENoiseIsoFilter         = m_eventInfo.passFilter_HBHEIso;
+  Flag_eeBadScFilter              = m_eventInfo.passFilter_EEBadSc; // not used
+  Flag_badChargedHadronFilter     = m_eventInfo.passFilter_chargedHadronTrackResolution;
+  Flag_badMuonFilter              = m_eventInfo.passFilter_muonBadTrack;
+  Flag_ECALDeadCell               = m_eventInfo.passFilter_ECALDeadCell;
+  HLT_JJ                          = isfired;
+  
+  
+
+ if (m_isData && !isfired)  throw SError( SError::SkipEvent );
   // for inclusive signal samples only take generated hadronic events
   // if( m_isSignal && !SignalIsHad( m_genParticle, m_Channel)) throw SError( SError::SkipEvent);
 
@@ -267,7 +313,6 @@ void VVanalysis::ExecuteEvent( const SInputData&, Double_t weight) throw( SError
   std::vector<UZH::GenParticle> GenQuarks  = FindGeneratedQuarks(m_genParticle, m_isData);
   std::vector<UZH::Electron> goodElectrons = FindGoodLeptons(m_electron);
   std::vector<UZH::Muon>     goodMuons     = FindGoodLeptons(m_muon);
-  std::vector<UZH::Jet> puppiJets;
 
   
  // if (m_eventInfo.lumiBlock  == 43 && m_eventInfo.eventNumber== 7276 && m_eventInfo.runNumber  == 1) {
@@ -290,15 +335,6 @@ void VVanalysis::ExecuteEvent( const SInputData&, Double_t weight) throw( SError
   for ( int i = 0; i < (m_jetAK8.N); ++i ) {
 
     UZH::Jet myjet( &m_jetAK8, i );
-    // int tightID = 0;
- //    if( (myjet.nhf()<0.90 && myjet.nemf()<0.90 &&  (myjet.cm()+myjet.nm()) >1) && ( (abs(myjet.eta())<=2.4 && myjet.chf()>0 && myjet.cm()>0 && myjet.cemf()<0.99) || abs(myjet.eta())>2.4)) tightID = 1;
-      //  if (m_eventInfo.lumiBlock  == 43 && m_eventInfo.eventNumber== 7276 && m_eventInfo.runNumber  == 1) {
-      //    std::cout << "---NEW AK8 JET---- : " << i << std::endl;
-      //   std::cout<< "myjet.IDTight() = " << myjet.IDTight()<<std::endl;
-      //    std::cout<< "myjet.eta() = " << myjet.eta() <<std::endl;
-      //   std::cout<< "myjet.pt() = " << myjet.pt() <<std::endl;
-      // }
-      
     if ( i == 0 && !myjet.IDTight()) break;
     if (! (myjet.pt() > 200       )) continue;
     if (! (fabs(myjet.eta()) < 2.5)) continue;
@@ -318,21 +354,9 @@ void VVanalysis::ExecuteEvent( const SInputData&, Double_t weight) throw( SError
       {
         if(ii == puppiMatch.at(m)) samePuppiJet=1;
       }
-     // if (m_eventInfo.lumiBlock  == 43 && m_eventInfo.eventNumber== 7276 && m_eventInfo.runNumber  == 1) {
- //        std::cout <<"PUPPI jet nr" << ii << std::endl;
- //        std::cout << "dR = "<< dR <<std::endl;
- //        std::cout << "mypuppijet pt= " <<  mypuppijet.pt() << std::endl;
- //        // std::cout << "mypuppijet eta= " << mypuppijet.eta() << std::endl;
- //        // std::cout << "mypuppijet phi= " << mypuppijet.phi() << std::endl;
- //        std::cout << "mypuppijet M= " <<   mypuppijet.m() << std::endl;
- //        std::cout << "mypuppijet softdrop_mass= " <<   mypuppijet.softdrop_mass() << std::endl;
- //        std::cout << "mypuppijet softdrop_mass= " <<   mypuppijet.softdrop_massCorr() << std::endl;
- //         std::cout << "Is jet " << ii << " same PUPPI jet? Yes==1 ---> " <<   samePuppiJet << std::endl;
- //      }
-      
+
       if (samePuppiJet) continue;
       puppiMatch.push_back(ii);
-      puppiJets.push_back(mypuppijet);
       dRmin = dR;
       
       myjet.puppi_softdropmass= ApplyPuppiSoftdropMassCorrections(mypuppijet,m_puppisd_corr,m_isData);//mypuppijet.softdrop_mass();
@@ -341,27 +365,13 @@ void VVanalysis::ExecuteEvent( const SInputData&, Double_t weight) throw( SError
   
     }
 
-    // if (m_eventInfo.lumiBlock  == 96 && m_eventInfo.eventNumber== 16283 && m_eventInfo.runNumber  == 1)
- //      {
- //        std::cout<< "dR = " << myjet.tlv().DeltaR(goodElectrons[0].tlv())<<std::endl;
- //         std::cout<< "jet pT = " << myjet.tlv().Pt() <<std::endl;
- //        std::cout<< "puppi_softdropmass = " << myjet.puppi_softdropmass <<std::endl;
- //      }
+   
     if(! FoundNoLeptonOverlap(goodElectrons,goodMuons,myjet.tlv()) ) continue;
    
        
     goodFatJets.push_back(myjet);
   }
-  
-// if (m_eventInfo.lumiBlock  == 167 && m_eventInfo.eventNumber== 28364 && m_eventInfo.runNumber  == 1) {
-//     std::cout<< "jj size =" <<  goodFatJets.size() << std::endl;
-//     for( unsigned int i=0; i < goodFatJets.size(); ++i){
-//          std::cout<< i << " goodFatJets mass = " << goodFatJets[i].puppi_softdropmass << std::endl;
-//          std::cout<< i << " goodFatJets pt   = " << goodFatJets[i].tlv().Pt()  << std::endl;
-//           std::cout<< i << " goodFatJets tau21   = " << goodFatJets[i].puppi_tau2/goodFatJets[i].puppi_tau1  << std::endl;
-//          std::cout<<""<<std::endl;
-//     }
-//   }
+
 
   //-------------Select two fat jets-------------//
   if( goodFatJets.size() < 2 ) throw SError( SError::SkipEvent );
@@ -375,19 +385,21 @@ void VVanalysis::ExecuteEvent( const SInputData&, Double_t weight) throw( SError
      ) throw SError( SError::SkipEvent );
   ++m_passedPuppi;
   ( *m_test )[ 2 ]++;
-
-
-     
-  std::vector<UZH::Jet> goodFatJets_sorted = SortAfterPuppiSDMass(goodFatJets);
+  
+  // goodFatJets.resize(2);
+  // std::vector<UZH::Jet> goodFatJets_sorted = SortAfterPuppiSDMass(goodFatJets); //deprecated! Now sort after tau21
+  
+  goodFatJets.resize(2);
+  std::vector<UZH::Jet> goodFatJets_sorted = SortAfterTau21(goodFatJets);
   
   //Match to gen jet
   if(!m_isData){
-    for( unsigned int i=0; i < goodFatJets.size(); ++i){
+    for( unsigned int i=0; i < goodFatJets_sorted.size(); ++i){
       float dRmin = 99.;
       int jetIdx = 99;
       for ( int j = 0; j < (m_genjetAK8.N); ++j ) {
         UZH::Jet genJet( &m_genjetAK8, j );
-        if ( genJet.pt() < 1. ) continue;
+        if ( genJet.pt() < 50. ) continue;
         float dR = (genJet.tlv()).DeltaR((goodFatJets_sorted.at(i)).tlv());
         if ( dR > dRmin ) continue;
         dRmin = dR;
@@ -398,19 +410,7 @@ void VVanalysis::ExecuteEvent( const SInputData&, Double_t weight) throw( SError
   }
 }
   
-  
-  // FOR SYNCH
-  // if (m_eventInfo.lumiBlock  == 94 && m_eventInfo.eventNumber== 15927 && m_eventInfo.runNumber  == 1) {
-  //   std::cout<< "jj mass =" << (goodFatJets_sorted[0].tlv() + goodFatJets_sorted[1].tlv()).M() << std::endl;
-  //   std::cout<< "jj deta = " << fabs( (goodFatJets_sorted[0].tlv()).Eta() - (goodFatJets_sorted[1].tlv()).Eta() ) << std::endl;
-  //   for( unsigned int i=0; i < goodFatJets.size(); ++i){
-  //        std::cout<< i << " goodFatJets_sorted mass = " << goodFatJets_sorted[i].puppi_softdropmass << std::endl;
-  //        std::cout<< i << " goodFatJets_sorted pt   = " << goodFatJets_sorted[i].tlv().Pt()  << std::endl;
-  //         std::cout<< i << " goodFatJets_sorted tau21   = " << goodFatJets_sorted[i].puppi_tau2/goodFatJets_sorted[i].puppi_tau1  << std::endl;
-  //        std::cout<<""<<std::endl;
-  //   }
-  // }
-  
+
   // dEta cut
   if( fabs( (goodFatJets_sorted[0].tlv()).Eta() - (goodFatJets_sorted[1].tlv()).Eta() )  > 1.3 ) throw SError( SError::SkipEvent );
   
@@ -424,7 +424,7 @@ void VVanalysis::ExecuteEvent( const SInputData&, Double_t weight) throw( SError
 
   // Loose Mjj cut to slim down samples
   TLorentzVector dijet = goodFatJets_sorted[0].tlv() + goodFatJets_sorted[1].tlv();
-  if( dijet.M() < 1000. ) throw SError( SError::SkipEvent );
+  if( dijet.M() < 700. ) throw SError( SError::SkipEvent );
   
   ++m_passedMjj;
   ( *m_test )[ 4 ]++;
@@ -453,31 +453,6 @@ void VVanalysis::ExecuteEvent( const SInputData&, Double_t weight) throw( SError
   m_o_eta_jet1             = goodFatJets_sorted[0].tlv().Eta();
   m_o_eta_jet2             = goodFatJets_sorted[1].tlv().Eta();
   
-  
-  bool isfired = false;
-  for( std::map<std::string,bool>::iterator it = (m_eventInfo.trigDecision)->begin(); it != (m_eventInfo.trigDecision)->end(); ++it){
-    if( (it->first).find("AK8PFJet360_TrimMass30")          != std::string::npos) HLTJet360_TrimMass30      = it->second;
-    if( (it->first).find("AK8PFHT700_TrimR0p1PT0p03Mass50") != std::string::npos) HLTHT700_TrimMass50       = it->second;
-    if( (it->first).find("PFHT650_WideJetMJJ950DEtaJJ1p5")  != std::string::npos) HLTHT650_MJJ950DEtaJJ1p5  = it->second;
-    if( (it->first).find("PFHT650_WideJetMJJ900DEtaJJ1p5")  != std::string::npos) HLTHT650_MJJ900DEtaJJ1p5  = it->second;
-    if( (it->first).find("PFHT800_v")                       != std::string::npos) HLTHT800                  = it->second;
-    if (HLTJet360_TrimMass30 or HLTHT700_TrimMass50 or HLTHT650_MJJ950DEtaJJ1p5 or HLTHT650_MJJ900DEtaJJ1p5 or HLTHT800) isfired = true;
-  }
-  
-  b_lumi                          = m_eventInfo.lumiBlock;
-  b_event                         = m_eventInfo.eventNumber;
-  b_run                           = m_eventInfo.runNumber;
-  Flag_goodVertices               = m_eventInfo.PV_filter;
-  Flag_globalTightHalo2016Filter  = m_eventInfo.passFilter_CSCHalo;
-  Flag_HBHENoiseFilter            = m_eventInfo.passFilter_HBHELoose;
-  Flag_HBHENoiseIsoFilter         = m_eventInfo.passFilter_HBHEIso;
-  Flag_eeBadScFilter              = m_eventInfo.passFilter_EEBadSc;
-  Flag_badChargedHadronFilter     = m_eventInfo.passFilter_chargedHadronTrackResolution;
-  Flag_badMuonFilter              = m_eventInfo.passFilter_muonBadTrack;
-  Flag_ECALDeadCell               = m_eventInfo.passFilter_ECALDeadCell;
-  HLT_JJ                          = isfired;
-  
-
   if(!m_isData){
     m_o_genmjj                      = (goodGenJets[0].tlv() + goodGenJets[1].tlv()).M();
     m_o_mgensoftdrop_jet1           = goodGenJets[0].softdropmass();
@@ -539,7 +514,8 @@ double VVanalysis::getEventWeight() {
       break;
     }
   }
-  b_weightGen = (m_eventInfo.genEventWeight < 0) ? -1 : 1; 
+  // b_weightGen = (m_eventInfo.genEventWeight < 0) ? -1 : 1;
+  b_weightGen = m_eventInfo.genEventWeight; //needed for Herwig
   weight *= b_weightPU*b_weightGen;
   
   return weight;
