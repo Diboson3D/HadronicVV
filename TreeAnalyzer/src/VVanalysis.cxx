@@ -313,6 +313,7 @@ void VVanalysis::ExecuteEvent( const SInputData&, Double_t weight) throw( SError
   std::vector<UZH::GenParticle> GenQuarks  = FindGeneratedQuarks(m_genParticle, m_isData);
   std::vector<UZH::Electron> goodElectrons = FindGoodLeptons(m_electron);
   std::vector<UZH::Muon>     goodMuons     = FindGoodLeptons(m_muon);
+
   
  // if (m_eventInfo.lumiBlock  == 43 && m_eventInfo.eventNumber== 7276 && m_eventInfo.runNumber  == 1) {
  //      std::cout<< "goodElectrons size =" <<  goodElectrons.size() << std::endl;
@@ -353,12 +354,7 @@ void VVanalysis::ExecuteEvent( const SInputData&, Double_t weight) throw( SError
       {
         if(ii == puppiMatch.at(m)) samePuppiJet=1;
       }
-     // if (m_eventInfo.lumiBlock  == 43 && m_eventInfo.eventNumber== 7276 && m_eventInfo.runNumber  == 1) {
- //        std::cout << "mypuppijet pt= " <<  mypuppijet.pt() << std::endl;
- //        std::cout << "mypuppijet eta= " << mypuppijet.eta() << std::endl;
- //        std::cout << "mypuppijet phi= " << mypuppijet.phi() << std::endl;
- //      }
-      
+
       if (samePuppiJet) continue;
       puppiMatch.push_back(ii);
       dRmin = dR;
@@ -368,7 +364,6 @@ void VVanalysis::ExecuteEvent( const SInputData&, Double_t weight) throw( SError
       myjet.puppi_tau2        = mypuppijet.tau2();
   
     }
-    
 
    
     if(! FoundNoLeptonOverlap(goodElectrons,goodMuons,myjet.tlv()) ) continue;
@@ -395,7 +390,7 @@ void VVanalysis::ExecuteEvent( const SInputData&, Double_t weight) throw( SError
   // std::vector<UZH::Jet> goodFatJets_sorted = SortAfterPuppiSDMass(goodFatJets); //deprecated! Now sort after tau21
   
   goodFatJets.resize(2);
-  std::vector<UZH::Jet> goodFatJets_sorted = SortAfterTau21(goodFatJets);
+  std::vector<UZH::Jet> goodFatJets_sorted = Randomize(goodFatJets,m_eventInfo.eventNumber) ;//SortAfterTau21(goodFatJets);
   
   //Match to gen jet
   if(!m_isData){

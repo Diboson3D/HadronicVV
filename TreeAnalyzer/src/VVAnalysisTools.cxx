@@ -149,16 +149,40 @@ std::vector<UZH::Jet> SortAfterTau21(std::vector <UZH::Jet> jets){
 }
 
 
+std::vector<UZH::Jet> Randomize(std::vector <UZH::Jet> jets, unsigned int event){
+    if ( event%2 == 0){ return jets;}
+        std::vector<UZH::Jet> newjets;
+    newjets.push_back(jets.at(1));
+    newjets.push_back(jets.at(0));
+  
+    return newjets;
+}
 
-void PrintEvent(std::vector<UZH::Jet> jets  )
+
+
+void PrintEvent(std::vector<UZH::Jet> jets, std::vector<UZH::Electron> ele, std::vector<UZH::Muon> mu )
 {
     std::cout << "D_eta " << fabs(jets.at(0).tlv().Eta()-jets.at(1).tlv().Eta()) << std::endl;
     std::cout << "Mjj   " << (jets.at(0).tlv()+jets.at(1).tlv()).M() <<std::endl;
     for(unsigned int i=0;i<jets.size(); i++)
     {
         std::cout << "jet pt " << jets.at(i).tlv().Pt() << " eta " << jets.at(i).tlv().Eta() << " phi " << jets.at(i).tlv().Phi() << " e " << jets.at(i).tlv().E() << " puppi sd mass "<< jets.at(i).puppi_softdropmass << std::endl;
+        std::cout << "lepton overlap " << FoundNoLeptonOverlap(ele,mu,jets.at(i).tlv()) <<std::endl; 
     
     }
+    
+    std::cout << "print out good leptons in the event :  " << std::endl;
+    for( unsigned int i=0;i<ele.size();i++)
+    {
+        std::cout << i << " ele pt " <<ele.at(i).pt() << " eta " << ele.at(i).eta() << " ID "<< ele.at(i).isHeepElectron() << std::endl;
+    }
+    
+    for( unsigned int i=0;i<mu.size();i++)
+    {
+        std::cout << i << " mu pt " << mu.at(i).pt() << " eta " << mu.at(i).eta() << " ID "<< mu.at(i).isTightMuon() << " isolation " << mu.at(i).trackIso()/mu.at(i).pt()  << std::endl;
+    }
+    
+    
 }
 
 
