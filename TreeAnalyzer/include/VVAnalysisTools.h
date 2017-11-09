@@ -22,4 +22,6 @@ std::vector<UZH::Jet> SortAfterTau21(std::vector <UZH::Jet> jets);
 
 void PrintEvent(std::vector<UZH::Jet> jets, std::vector<UZH::Electron> ele, std::vector<UZH::Muon> mu );
 
+std::vector<UZH::Jet> Randomize(std::vector <UZH::Jet> jets, unsigned int event);
+
 #endif

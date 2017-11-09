@@ -149,6 +149,16 @@ std::vector<UZH::Jet> SortAfterTau21(std::vector <UZH::Jet> jets){
 }
 
 
+std::vector<UZH::Jet> Randomize(std::vector <UZH::Jet> jets, unsigned int event){
+    if ( event%2 == 0){ return jets;}
+        std::vector<UZH::Jet> newjets;
+    newjets.push_back(jets.at(1));
+    newjets.push_back(jets.at(0));
+  
+    return newjets;
+}
+
+
 
 void PrintEvent(std::vector<UZH::Jet> jets, std::vector<UZH::Electron> ele, std::vector<UZH::Muon> mu )
 {
