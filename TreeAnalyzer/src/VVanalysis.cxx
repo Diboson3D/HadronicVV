@@ -390,7 +390,7 @@ void VVanalysis::ExecuteEvent( const SInputData&, Double_t weight) throw( SError
   // std::vector<UZH::Jet> goodFatJets_sorted = SortAfterPuppiSDMass(goodFatJets); //deprecated! Now sort after tau21
   
   goodFatJets.resize(2);
-  std::vector<UZH::Jet> goodFatJets_sorted = Randomize(goodFatJets,m_eventInfo.eventNumber) ;//SortAfterTau21(goodFatJets);
+  std::vector<UZH::Jet> goodFatJets_sorted = Randomize(goodFatJets,m_eventInfo.eventNumber) ; //SortAfterTau21(goodFatJets); 
   
   //Match to gen jet
   if(!m_isData){
