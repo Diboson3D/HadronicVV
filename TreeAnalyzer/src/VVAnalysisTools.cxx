@@ -19,7 +19,7 @@ std::vector<UZH::GenParticle> FindGeneratedQuarks(Ntuple::GenParticleNtupleObjec
 {
   std::vector<UZH::GenParticle> GenQuarks;
   if(m_isData) return GenQuarks;
-  for(int i=0;i< m_genParticle.N;i++)
+  for(int i=0;i< m_genParticle.pdgId->size();i++)
   {
     bool containsV=0;
     if(TMath::Abs(m_genParticle.pdgId->at(i)) > 6 or TMath::Abs(m_genParticle.pdgId->at(i)) <1) continue;
