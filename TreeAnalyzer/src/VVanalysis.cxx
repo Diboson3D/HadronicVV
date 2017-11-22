@@ -214,7 +214,6 @@ void VVanalysis::EndMasterInputData( const SInputData& ) throw( SError ){ //this
 
 
 void VVanalysis::ExecuteEvent( const SInputData&, Double_t weight) throw( SError ) { //This is the main analysis function that is called for each event. It receives the weight of the event, as it is calculated by the framework from the luminosities and generator cuts defined in the XML configuration.
-  std::cout << "execute event " <<std::endl;
   // float gW = (m_eventInfo.genEventWeight < 0) ? -1 : 1;
   float gW = m_eventInfo.genEventWeight;  //needed for Herwig
   nSumGenWeights += gW;
@@ -275,26 +274,18 @@ void VVanalysis::ExecuteEvent( const SInputData&, Double_t weight) throw( SError
 
   ++m_allEvents;
   ( *m_test )[ 0 ]++;
-   std::cout <<  m_jetAK8.N << std::endl;  
    if( m_jetAK8.N < 2 ) throw SError( SError::SkipEvent );
   //-------------Select two fat jets-------------//
   std::vector<UZH::Jet> goodFatJets;
-  std::cout << "good fat jets" <<std::endl;
   std::vector<UZH::Jet> goodGenJets;
-  std::cout << "good gen jets " <<std::endl;
   std::vector<UZH::GenParticle> GenQuarks  = FindGeneratedQuarks(m_genParticle, m_isData);
-  std::cout << "genquarks " <<std::endl;
   std::vector<UZH::Electron> goodElectrons = FindGoodLeptons(m_electron);
-  std::cout << " goodele " <<std::endl;
   std::vector<UZH::Muon>     goodMuons     = FindGoodLeptons(m_muon);
-  std::cout << " good muon " <<std::endl;
 
 
   //std::vector<int> puppiMatch;
   for ( int i = 0; i < (m_jetAK8.N); ++i ) {
-    std::cout << i << std::endl;
     UZH::Jet myjet( &m_jetAK8, i );
-    std::cout << myjet.pt() <<std::endl;
     if ( i == 0 && !myjet.IDTight()) break;
     if (! (myjet.pt() > 200       )) continue;
     if (! (fabs(myjet.eta()) < 2.5)) continue;
@@ -318,22 +309,20 @@ void VVanalysis::ExecuteEvent( const SInputData&, Double_t weight) throw( SError
 //       if (samePuppiJet) continue;
 //       puppiMatch.push_back(ii);
 //       dRmin = dR;
-      std::cout << "befor puppi " <<std::endl;
       myjet.puppi_softdropmass= ApplyPuppiSoftdropMassCorrections(myjet,m_puppisd_corr,m_isData);//mypuppijet.softdrop_mass();
       myjet.puppi_tau1        = myjet.tau1();
       myjet.puppi_tau2        = myjet.tau2();
-      std::cout << "after puppi " <<std::endl;
   
 //    }
 
    
     if(! FoundNoLeptonOverlap(goodElectrons,goodMuons,myjet.tlv()) ) continue;
-    std::cout << " after lepton overlap " <<std::endl;
+    
        
     goodFatJets.push_back(myjet);
   }
 
- std::cout << " good fat jets size " <<goodFatJets.size() <<std::endl;
+
   //-------------Select two fat jets-------------//
   if( goodFatJets.size() < 2 ) throw SError( SError::SkipEvent );
   ++m_passedLoose;
@@ -346,23 +335,20 @@ void VVanalysis::ExecuteEvent( const SInputData&, Double_t weight) throw( SError
      ) throw SError( SError::SkipEvent );
   ++m_passedPuppi;
   ( *m_test )[ 2 ]++;
-  std::cout << " do we need this puppi match stuff? "<<goodFatJets[0].puppi_softdropmass  <<std::endl;
+ 
   
   // goodFatJets.resize(2);
   // std::vector<UZH::Jet> goodFatJets_sorted = SortAfterPuppiSDMass(goodFatJets); //deprecated! Now sort after tau21
   
   goodFatJets.resize(2);
   std::vector<UZH::Jet> goodFatJets_sorted = Randomize(goodFatJets,m_eventInfo.eventNumber) ; //SortAfterTau21(goodFatJets); 
-  std::cout << "is the event number the problem ? "<<std::endl;
+  
   //Match to gen jet
   if(!m_isData){
     for( unsigned int i=0; i < goodFatJets_sorted.size(); ++i){
       float dRmin = 99.;
       int jetIdx = 99;
-      std::cout << "bla " <<std::endl;
-      std::cout << m_genjetAK8.N <<std::endl;
       for ( int j = 0; j < (m_genjetAK8.N); ++j ) {
-          std::cout << m_genjetAK8.N <<std::endl;
         UZH::Jet genJet( &m_genjetAK8, j );
         if ( genJet.pt() < 50. ) continue;
         float dR = (genJet.tlv()).DeltaR((goodFatJets_sorted.at(i)).tlv());
